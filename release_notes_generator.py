@@ -135,4 +135,3 @@ if __name__ == '__main__':
     # Call send_slack_message() function to send the release information to a Slack channel
     if release_notes:
         release_notes_generator.send_slack_message(SLACK_CHANNEL, release_notes)
-    
