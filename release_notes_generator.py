@@ -81,18 +81,23 @@ class ReleaseNotesGenerator:
         connection = Connection(base_url=self.org_url, creds=credentials)
 
         # Get clients to interact with the Build, and Work Item Tracking APIs
-        build_client = connection.clients.get_build_client()
         work_item_client = connection.clients.get_work_item_tracking_client()
 
         # Check if there is a deployment artifact associated with the release
         deployment_artifact = release.artifacts[0] if release.artifacts else None
 
         if deployment_artifact:
-            message = f"Deployment Report for {release.name}\n"
+            # Create the link using the organization URL and release ID
+            link = (f"{self.org_url}/"
+                    f"{self.org_project}/"
+                    f"_releaseProgress?_a=release-pipeline-progress"
+                    f"&releaseId={release.id}")
+
+            message = f"Released <{link}|{release.name}>\n"
 
             # If there is a deployment artifact, get the work items associated with it
             build_run_id = deployment_artifact.definition_reference['version'].id
-            work_item_refs = build_client.get_build_work_items_refs(
+            work_item_refs = connection.clients.get_build_client().get_build_work_items_refs(
                 project=self.org_project,
                 build_id=build_run_id
             )
@@ -108,7 +113,7 @@ class ReleaseNotesGenerator:
             for work_item in work_items:
                 work_item_type = work_item.fields['System.WorkItemType']
                 emoji = '🐞' if work_item_type == 'Bug' else '⭐'
-                message += f"{emoji} {work_item.id} - {work_item.fields['System.Title']}\n"
+                message += f"• {emoji} {work_item.id} - {work_item.fields['System.Title']}\n"
 
         else:
             logging.error("No deployment artifact found for this release")
