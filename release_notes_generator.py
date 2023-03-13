@@ -113,7 +113,8 @@ class ReleaseNotesGenerator:
             for work_item in work_items:
                 work_item_type = work_item.fields['System.WorkItemType']
                 emoji = '🐞' if work_item_type == 'Bug' else '⭐'
-                message += f"• {emoji} {work_item.id} - {work_item.fields['System.Title']}\n"
+                work_item_link = f"{self.org_url}/{self.org_project}/_workitems/edit/{work_item.id}"
+                message += f"• {emoji} <{work_item_link}|{work_item.id}> - {work_item.fields['System.Title']}\n"
 
         else:
             logging.error("No deployment artifact found for this release")
